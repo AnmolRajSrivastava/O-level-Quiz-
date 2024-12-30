@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>O Level Quiz</title>
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      color: #333;
+      transition: background-color 0.3s ease;
+    }
+
+    .screen {
+      text-align: center;
+      padding: 40px;
+      background-color: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+      max-width: 600px;
+      width: 100%;
+    }
+
+    h1 {
+      font-size: 2.8em;
+      color: #1e3a8a;
+      margin-bottom: 20px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+
+    button {
+      padding: 15px 30px;
+      font-size: 18px;
+      border: none;
+      background: linear-gradient(90deg, #ff8a00, #e52e71);
+      color: white;
+      border-radius: 12px;
+      cursor: pointer;
+      margin: 16px 0;
+      transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+      font-weight: 700;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    button:hover {
+      background: linear-gradient(90deg, #e52e71, #ff8a00);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(229, 46, 113, 0.3);
+    }
+
+    button:active {
+      transform: translateY(2px);
+      box-shadow: 0 4px 12px rgba(229, 46, 113, 0.2);
+    }
+
+    button:focus {
+      outline: none;
+      box-shadow: 0 0 10px 3px rgba(255, 138, 0, 0.5);
+    }
+
+    .btn-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .btn-container button {
+      display: block;
+      width: 100%;
+      margin: 10px 0;
+      padding: 15px 20px;
+      font-size: 18px;
+      background: linear-gradient(90deg, #4caf50, #00c853);
+      border-radius: 8px;
+      color: white;
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .btn-container button:hover {
+      background: linear-gradient(90deg, #00c853, #4caf50);
+      box-shadow: 0 8px 20px rgba(0, 200, 83, 0.3);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    @media (max-width: 600px) {
+      .screen {
+        padding: 20px;
+        width: 90%;
+      }
+
+      h1 {
+        font-size: 2.2em;
+      }
+
+      button {
+        padding: 12px 20px;
+        font-size: 16px;
+      }
+    }
+
+    p {
+      font-size: 1.2em;
+      color: #555;
+      margin-top: 20px;
+    }
+
+    #score {
+      font-weight: bold;
+      font-size: 1.5em;
+      color: #2575fc;
+    }
+  </style>
+</head>
+<body>
+  <div id="start-screen" class="screen">
+    <h1>Have you done the O Level Course?</h1>
+    <button id="start-btn">YES</button>
+  </div>
+
+  <div id="quiz-screen" class="screen hidden">
+    <div id="question-container">
+      <h2 id="question"></h2>
+      <div id="answer-buttons" class="btn-container"></div>
+    </div>
+    <button id="next-btn" class="hidden">Next</button>
+  </div>
+
+  <div id="end-screen" class="screen hidden">
+    <h1>Quiz Completed!</h1>
+    <p>Your Score: <span id="score"></span>/10</p>
+    <button id="restart-btn">Restart</button>
+  </div>
+
+  <script>
+    const startScreen = document.getElementById("start-screen"); // Start screen element
+    const quizScreen = document.getElementById("quiz-screen"); // Quiz screen element
+    const endScreen = document.getElementById("end-screen"); // End screen element
+    const startBtn = document.getElementById("start-btn"); // Button to start the quiz
+    const nextBtn = document.getElementById("next-btn"); // Button to move to the next question
+    const restartBtn = document.getElementById("restart-btn"); // Button to restart the quiz
+    const questionContainer = document.getElementById("question-container"); // Container for the question and answers
+    const questionElement = document.getElementById("question"); // Element displaying the current question
+    const answerButtons = document.getElementById("answer-buttons"); // Container for answer buttons
+    const scoreElement = document.getElementById("score"); // Element displaying the user's score
+
+    let shuffledQuestions, currentQuestionIndex, score;
+
+    const questions = [
+      {
+        question: "What is the output of `print('Hello'[-1])`?",
+        answers: [
+          { text: "H", correct: false },
+          { text: "Error", correct: false },
+          { text: "None", correct: false },
+          { text: "o", correct: true }
+        ]
+      },
+      {
+        question: "What will be the result of `list(range(5, 10, 2))`?",
+        answers: [
+          { text: "[5, 6, 7, 8, 9]", correct: false },
+          { text: "[5, 7, 9]", correct: true },
+          { text: "[5, 8]", correct: false },
+          { text: "[5, 10]", correct: false }
+        ]
+      },
+      {
+        question: "Which of the following is used to handle exceptions in Python?",
+        answers: [
+          { text: "catch-finally", correct: false },
+          { text: "try-catch", correct: false },
+          { text: "try-except", correct: true },
+          { text: "error-check", correct: false }
+        ]
+      },
+      {
+        question: "What is the output of the following: `print('2' + '3')`?",
+        answers: [
+          { text: "5", correct: false },
+          { text: "Error", correct: false },
+          { text: "23", correct: true },
+          { text: "None", correct: false }
+        ]
+      },
+      {
+        question: "Which statement is used to terminate a loop in Python?",
+        answers: [
+          { text: "break", correct: true },
+          { text: "exit", correct: false },
+          { text: "stop", correct: false },
+          { text: "terminate", correct: false }
+        ]
+      },
+      {
+        question: "Which protocol is commonly used for IoT devices to communicate over the internet?",
+        answers: [
+          { text: "MQTT", correct: true },
+          { text: "HTTP", correct: false },
+          { text: "FTP", correct: false },
+          { text: "SMTP", correct: false }
+        ]
+      },
+      {
+        question: "What does the term 'edge computing' refer to in IoT?",
+        answers: [
+          { text: "Storing data in the cloud", correct: false },
+          { text: "Developing IoT firmware", correct: false },
+          { text: "Analyzing data using AI", correct: false },
+          { text: "Processing data closer to the device", correct: true }
+        ]
+      },
+      {
+        question: "Which of the following is NOT a typical IoT device?",
+        answers: [
+          { text: "Smart thermostat", correct: false },
+          { text: "Fitness tracker", correct: false },
+          { text: "Smart light bulb", correct: false },
+          { text: "Desktop computer", correct: true }
+        ]
+      },
+      {
+        question: "What is the primary function of an IoT gateway?",
+        answers: [
+          { text: "Stores IoT data locally", correct: false },
+          { text: "Connects IoT devices to the cloud", correct: true },
+          { text: "Enhances network security", correct: false },
+          { text: "Controls all IoT devices", correct: false }
+        ]
+      },
+      {
+        question: "What does 'LoRaWAN' stand for in IoT?",
+        answers: [
+          { text: "Long Range Wide Area Network", correct: true },
+          { text: "Local Range Wide Area Network", correct: false },
+          { text: "Low Response Wireless Access Network", correct: false },
+          { text: "Lightweight Range Access Network", correct: false }
+        ]
+      },
+      {
+        question: "Which of the following technologies is primarily used for short-range communication in IoT?",
+        answers: [
+          { text: "Bluetooth", correct: true },
+          { text: "Zigbee", correct: false },
+          { text: "LTE", correct: false },
+          { text: "Wi-Fi", correct: false }
+        ]
+      },
+      {
+        question: "What is the main advantage of using IPv6 in IoT devices?",
+        answers: [
+          { text: "Faster data transmission", correct: false },
+          { text: "Larger address space", correct: true },
+          { text: "Better security", correct: false },
+          { text: "Lower power consumption", correct: false }
+        ]
+      },
+      {
+        question: "Which IoT communication protocol is designed for low-power wide-area networks (LPWAN)?",
+        answers: [
+          { text: "Wi-Fi", correct: false },
+          { text: "LoRaWAN", correct: true },
+          { text: "Bluetooth LE", correct: false },
+          { text: "Z-Wave", correct: false }
+        ]
+      },
+      {
+        question: "Which of the following is a widely used platform for managing IoT devices?",
+        answers: [
+          { text: "Google Drive", correct: false },
+          { text: "Amazon EC2", correct: false },
+          { text: "Dropbox", correct: false },
+          { text: "ThingSpeak", correct: true },
+        ]
+      },
+      {
+        question: "Which of the following is NOT a key feature of an IoT device?",
+        answers: [
+          { text: "Remote control", correct: false },
+          { text: "Autonomous decision-making", correct: true },
+          { text: "Data collection", correct: false },
+          { text: "Connectivity", correct: false }
+        ]
+      },
+      {
+        question: "What is the function of an IoT sensor?",
+        answers: [
+          { text: "Stores and processes data", correct: false },
+          { text: "Collects data from the environment", correct: true },
+          { text: "Displays data", correct: false },
+          { text: "Transmits data to the cloud", correct: false }
+        ]
+      },
+      {
+        question: "What is a common security risk associated with IoT devices?",
+        answers: [
+          { text: "Excessive battery life", correct: false },
+          { text: "Low-cost sensors", correct: false },
+          { text: "Lack of encryption", correct: true },
+          { text: "Over-reliance on cloud computing", correct: false }
+        ]
+      },
+      {
+        question: "What does the term 'interoperability' mean in the context of IoT?",
+        answers: [
+          { text: "The ability to connect to the internet", correct: false },
+          { text: "The ability to store large amounts of data", correct: false },
+          { text: "The ability of devices to work together across different platforms", correct: true },
+          { text: "The ability to autonomously control devices", correct: false }
+        ]
+      },
+      {
+        question: "What is the role of IoT middleware?",
+        answers: [
+          { text: "Stores device firmware", correct: false },
+          { text: "Controls the power supply of IoT devices", correct: false },
+          { text: "Acts as an intermediary between IoT devices and the cloud", correct: true },
+          { text: "Encrypts the communication between devices", correct: false }
+        ]
+      },
+      {
+        question: "Which of the following sensors is commonly used in an IoT-based weather monitoring system?",
+        answers: [
+          { text: "Pressure sensor", correct: false },
+          { text: "Temperature sensor", correct: true },
+          { text: "Motion sensor", correct: false },
+          { text: "Proximity sensor", correct: false }
+        ]
+      },
+      {
+        question: "Which of the following is the main function of a version control system?",
+        answers: [
+          { text: "To organize and store files on the cloud", correct: false },
+          { text: "To automate code deployment", correct: false },
+          { text: "To perform unit tests on the source code", correct: false },
+          { text: "To track and manage changes in source code", correct: true }
+        ]
+      },
+      {
+        question: "Which tool is primarily used for project management and issue tracking?",
+        answers: [
+          { text: "JIRA", correct: true },
+          { text: "GitHub", correct: false },
+          { text: "Slack", correct: false },
+          { text: "Visual Studio Code", correct: false }
+        ]
+      },
+      {
+        question: "What is the purpose of 'Docker' in the context of IT tools?",
+        answers: [
+          { text: "To create and manage containers for software deployment", correct: true },
+          { text: "To manage cloud storage", correct: false },
+          { text: "To track project issues", correct: false },
+          { text: "To edit and compile source code", correct: false }
+        ]
+      },
+      {
+        question: "Which of the following is NOT a database management system (DBMS)?",
+        answers: [
+          { text: "MongoDB", correct: false },
+          { text: "MySQL", correct: false },
+          { text: "SQLite", correct: false },
+          { text: "Apache Kafka", correct: true }
+        ]
+      },
+      {
+        question: "What does the 'Git' command 'git clone' do?",
+        answers: [
+          { text: "Creates a local copy of a repository", correct: true },
+          { text: "Uploads local changes to a remote repository", correct: false },
+          { text: "Displays the history of commits", correct: false },
+          { text: "Merges two branches", correct: false }
+        ]
+      },    
+    ];
+
+    const TOTAL_QUESTIONS = 10; // Total number of questions displayed in the quiz
+
+    startBtn.addEventListener("click", startQuiz); // Event listener for starting the quiz
+    nextBtn.addEventListener("click", () => {
+      currentQuestionIndex++; // Increment question index
+      setNextQuestion(); // Load the next question
+    });
+    restartBtn.addEventListener("click", () => location.reload()); // Restart the quiz by reloading the page
+
+    function startQuiz() {
+      startScreen.classList.add("hidden"); // Hide the start screen
+      quizScreen.classList.remove("hidden"); // Show the quiz screen
+      // Shuffle questions randomly and select the first 10
+      shuffledQuestions = questions.sort(() => Math.random() - 0.5).slice(0, TOTAL_QUESTIONS);
+      currentQuestionIndex = 0; // Reset the question index
+      score = 0; // Reset the score
+      setNextQuestion(); // Load the first question
+    }
+
+    function setNextQuestion() {
+      resetState(); // Reset answer buttons and UI
+      showQuestion(shuffledQuestions[currentQuestionIndex]); // Display the current question
+    }
+
+    function showQuestion(question) {
+      questionElement.innerText = question.question; // Set the question text
+      question.answers.forEach(answer => {
+        const button = document.createElement("button"); // Create a button for each answer
+        button.innerText = answer.text; // Set button text to answer text
+        button.classList.add("btn"); // Add button styling class
+        if (answer.correct) {
+          button.dataset.correct = answer.correct; // Mark correct answer with a dataset
+        }
+        button.addEventListener("click", selectAnswer); // Add click event to check the answer
+        answerButtons.appendChild(button); // Append button to the answer container
+      });
+    }
+
+    function resetState() {
+      nextBtn.classList.add("hidden"); // Hide the Next button
+      while (answerButtons.firstChild) {
+        answerButtons.removeChild(answerButtons.firstChild); // Remove all existing answer buttons
+      }
+    }
+
+    function selectAnswer(e) {
+      const selectedButton = e.target; // Get the clicked button
+      const correct = selectedButton.dataset.correct === "true"; // Check if the selected answer is correct
+      if (correct) score++; // Increment score if the answer is correct
+      Array.from(answerButtons.children).forEach(button => {
+        setStatusClass(button, button.dataset.correct); // Update button styles to indicate correct or incorrect answers
+      });
+      if (shuffledQuestions.length > currentQuestionIndex + 1) {
+        nextBtn.classList.remove("hidden"); // Show the Next button if more questions are left
+      } else {
+        quizScreen.classList.add("hidden"); // Hide the quiz screen
+        endScreen.classList.remove("hidden"); // Show the end screen
+        scoreElement.innerText = score; // Display the final score
+      }
+    }
+
+    function setStatusClass(element, correct) {
+      clearStatusClass(element); // Clear existing status classes
+      element.classList.add(correct ? "correct" : "wrong"); // Add correct or wrong class based on the answer
+    }
+
+    function clearStatusClass(element) {
+      element.classList.remove("correct"); // Remove correct class
+      element.classList.remove("wrong"); // Remove wrong class
+    }
+  </script>
+</body>
+</html>
